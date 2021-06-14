@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="./list.js"></script>
+    <script src="./index.js"></script>
+  </head>
+  <body>
+    <marquee style="margin: 20px;"> Seja bem-vindo! A taxa para comprar NFT é de 2% fora as taxas basicas em BNB do contrato. Se quiser verificar o contrato click<a style="color: blue;" href="https://bscscan.com/address/0x80c9cc237302ec4c9be6291cd8a743776c4c4083"> aqui</a> <br></marquee>
+    <div class="container" >
+      <div class="w3-container w3-center w3-animate-top ">
+        <img src="img.svg" class="img-fluid" style="height: 200px">
+      </div>
+      <br><br>
+      <div class="row">
+        <div class="col-sm-4 w3-container w3-animate-left">
+          <div class="form-group">
+            <label for="exampleFormControlSelect1">Contato da NFT</label>
+            <select class="form-control" id="exampleFormControlSelect1">
+              <option>Dog on the Moon - 0x7bc07d83e1646f39302f0afaf91e1951a30d3d1a</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="usr">NFT ID:</label>
+            <input type="text" class="form-control" id="token" />
+          </div>
+          <div class="form-group">
+            <label for="pwd">Preço em Reau:</label>
+            <input type="text" class="form-control" id="price" placeholder="Todas as casas decimais" />
+          </div>
+          <button class="btn btn-info btn-block" id="approve-sell" onclick="approveNFT()">
+            Aprovar
+          </button>
+          <button class="btn btn-info btn-block" id="sell-sell" disabled onclick="publish()">
+            Publicar
+          </button>
+        </div>
+        <div class="col-sm-8  w3-container w3-animate-right ">
+          <br>
+          <ul class="list-group" id='row-principal' style="height: 500px; overflow: auto">
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    var store;
+    onload = () =>{
+      store = new Store("0x80c9cc237302ec4c9be6291cd8a743776c4c4083", "0x4c79b8c9cB0BD62B047880603a9DEcf36dE28344", "0x7bc07d83e1646f39302f0afaf91e1951a30d3d1a");
+      list();
+    };
+
+    async function list() {
+      document.getElementById('row-principal').innerHTML ='';
+      var listStore = await store.list();
+      for(let item of listStore) {
+        const details = await store.getByTokenId(item);
+        document.getElementById('row-principal').innerHTML += `
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-sm-3">NFT: <strong>#${details[0]}</strong></div>
+              <!-- <div class="col-sm-4"> ${web3js.utils.fromWei(details[2],'nano')} REAU</div> -->
+              <div class="col-sm-4"> ${web3js.utils.fromWei(details[2],'nano')} REAU</div>
+
+              <div class="col-sm-5 text-right">
+                <button class="btn btn-info btn-block" id="approve-${details[0]}" onclick ='approveToken(${web3js.utils.fromWei(details[2],'nano')}, ${details[0]})'>Aprovar</button>
+                <button class="btn btn-info btn-block" id="buy-${details[0]}" disabled onclick ='buy(${details[0]})'>Comprar</button>
+              </div>
+            </div>
+          </li>
+        `;
+        console.log(item);
+      }
+    }
+
+    async function buy(tokenId) {
+      await store.buy(tokenId);
+      setTimeout(()=>{
+        list();
+      }, 2000);
+    }
+
+    async function publish() {
+      await store.publish(document.getElementById('price').value, document.getElementById('token').value);
+      setTimeout(()=>{
+        list();
+      }, 2000);
+    }
+
+    function approveNFT() {
+      store.approveNFT(document.getElementById('token').value);
+    }
+    function approveToken(amount, tokenId) {
+      store.approveToken(amount, tokenId);
+    }
+
+  </script>
+
+</html>
+
+<style>
+#wave {
+  position: relative;
+  height: 70px;
+  width: 600px;
+  background: #e0efe3;
+}
+#wave:before {
+  content: "";
+  display: block;
+  position: absolute;
+  border-radius: 100% 50%;
+  width: 340px;
+  height: 80px;
+  background-color: white;
+  right: -5px;
+  top: 40px;
+}
+#wave:after {
+  content: "";
+  display: block;
+  position: absolute;
+  border-radius: 100% 50%;
+  width: 300px;
+  height: 70px;
+  background-color: #e0efe3;
+  left: 0;
+  top: 27px;
+}
+
+</style>
